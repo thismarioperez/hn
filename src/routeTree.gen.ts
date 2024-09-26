@@ -16,41 +16,50 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
-const appIndexLazyImport = createFileRoute('/(app)/')()
-const appAboutLazyImport = createFileRoute('/(app)/about')()
+const AboutLazyImport = createFileRoute('/about')()
+const IndexLazyImport = createFileRoute('/')()
+const FeedFilterLazyImport = createFileRoute('/feed/$filter')()
 
 // Create/Update Routes
 
-const appIndexLazyRoute = appIndexLazyImport
-  .update({
-    path: '/',
-    getParentRoute: () => rootRoute,
-  } as any)
-  .lazy(() => import('./routes/(app)/index.lazy').then((d) => d.Route))
+const AboutLazyRoute = AboutLazyImport.update({
+  path: '/about',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
 
-const appAboutLazyRoute = appAboutLazyImport
-  .update({
-    path: '/about',
-    getParentRoute: () => rootRoute,
-  } as any)
-  .lazy(() => import('./routes/(app)/about.lazy').then((d) => d.Route))
+const IndexLazyRoute = IndexLazyImport.update({
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const FeedFilterLazyRoute = FeedFilterLazyImport.update({
+  path: '/feed/$filter',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/feed/$filter.lazy').then((d) => d.Route))
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/(app)/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof appAboutLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/(app)/': {
+    '/': {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof appIndexLazyImport
+      preLoaderRoute: typeof IndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/feed/$filter': {
+      id: '/feed/$filter'
+      path: '/feed/$filter'
+      fullPath: '/feed/$filter'
+      preLoaderRoute: typeof FeedFilterLazyImport
       parentRoute: typeof rootRoute
     }
   }
@@ -59,38 +68,43 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/about': typeof appAboutLazyRoute
-  '/': typeof appIndexLazyRoute
+  '/': typeof IndexLazyRoute
+  '/about': typeof AboutLazyRoute
+  '/feed/$filter': typeof FeedFilterLazyRoute
 }
 
 export interface FileRoutesByTo {
-  '/about': typeof appAboutLazyRoute
-  '/': typeof appIndexLazyRoute
+  '/': typeof IndexLazyRoute
+  '/about': typeof AboutLazyRoute
+  '/feed/$filter': typeof FeedFilterLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/about': typeof appAboutLazyRoute
-  '/': typeof appIndexLazyRoute
+  '/': typeof IndexLazyRoute
+  '/about': typeof AboutLazyRoute
+  '/feed/$filter': typeof FeedFilterLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/about' | '/'
+  fullPaths: '/' | '/about' | '/feed/$filter'
   fileRoutesByTo: FileRoutesByTo
-  to: '/about' | '/'
-  id: '__root__' | '/about' | '/'
+  to: '/' | '/about' | '/feed/$filter'
+  id: '__root__' | '/' | '/about' | '/feed/$filter'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  appAboutLazyRoute: typeof appAboutLazyRoute
-  appIndexLazyRoute: typeof appIndexLazyRoute
+  IndexLazyRoute: typeof IndexLazyRoute
+  AboutLazyRoute: typeof AboutLazyRoute
+  FeedFilterLazyRoute: typeof FeedFilterLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  appAboutLazyRoute: appAboutLazyRoute,
-  appIndexLazyRoute: appIndexLazyRoute,
+  IndexLazyRoute: IndexLazyRoute,
+  AboutLazyRoute: AboutLazyRoute,
+  FeedFilterLazyRoute: FeedFilterLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -105,15 +119,19 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/",
         "/about",
-        "/"
+        "/feed/$filter"
       ]
     },
-    "/about": {
-      "filePath": "(app)/about.lazy.tsx"
-    },
     "/": {
-      "filePath": "(app)/index.lazy.tsx"
+      "filePath": "index.lazy.tsx"
+    },
+    "/about": {
+      "filePath": "about.lazy.tsx"
+    },
+    "/feed/$filter": {
+      "filePath": "feed/$filter.lazy.tsx"
     }
   }
 }
